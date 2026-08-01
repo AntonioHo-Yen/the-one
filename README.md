@@ -17,6 +17,7 @@
 
 ## Core Architecture
 
+```text
 Incoming Payload + Metadata
          │
          ▼
