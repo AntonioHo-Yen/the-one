@@ -30,6 +30,7 @@ Incoming Payload + Metadata
  ▼                                                   ▼
 [SystemAction::Overwrite]                 [SystemAction::FlagConflict]
 (Immediate State Mutation)                (Lock Field & Route to Queue)
+```
 
 ## Quickstart
 
