@@ -31,12 +31,27 @@ Incoming Payload + Metadata
 [SystemAction::Overwrite]                 [SystemAction::FlagConflict]
 (Immediate State Mutation)                (Lock Field & Route to Queue)
 
+## Quickstart
 
-git clone [https://github.com/YOUR_USERNAME/the-one.git](https://github.com/YOUR_USERNAME/the-one.git)
+### Prerequisites
+* Rust 1.80+ / Cargo
+
+### Running Tests
+
+Clone the repository and run the unit test suite:
+
+```bash
+git clone [https://github.com/AntonioHo-Yen/the-one.git](https://github.com/AntonioHo-Yen/the-one.git)
 cd the-one
 cargo test
+```
 
-use the_one::evaluator::{Evaluator, AttributeState, MetadataHeader, Tier, SystemAction};
+---
+
+## Usage Example
+
+```rust
+use the_one::evaluator::{AttributeState, Evaluator, MetadataHeader, SystemAction, Tier};
 
 fn main() {
     // Current state set by automated background sync
@@ -61,7 +76,11 @@ fn main() {
     };
 
     // Evaluate transition
-    let action = Evaluator::evaluate(&current_state, &user_update_meta, &"555-9999".to_string());
+    let action = Evaluator::evaluate(
+        &current_state,
+        &user_update_meta,
+        &"555-9999".to_string(),
+    );
 
     match action {
         SystemAction::Overwrite => println!("State updated immediately."),
@@ -70,3 +89,4 @@ fn main() {
         SystemAction::Commit => println!("Standard update committed."),
     }
 }
+```
