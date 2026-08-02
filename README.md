@@ -1,12 +1,14 @@
-# The One
+# The One (TO1) Protocol & State Engine
 
-**The One** is a deterministic, authority-tiered state engine written in Rust. It acts as an immutable gatekeeper for state updates, guaranteeing that human user intent takes absolute precedence over background scripts, automated integrations, and conflicting administrative overrides.
+**The One** is a deterministic, authority-tiered state engine written in Rust. It acts as an immutable gatekeeper for state updates, guaranteeing that human user intent takes absolute precedence over background scripts, automated integrations, and conflicting administrative overrides. Eliminating redundant PII forms, preventing silent data overwrites, and giving individuals true digital state sovereignty.
 
+*"Created out of pure developer laziness—because I got tired of re-typing my info into endless random web forms."*
 ---
 
 ## Key Features
 
 * **Authority Hierarchy:** Enforces explicit privilege tiers across all incoming data payloads:
+    **Origin Anchor:** Immutable cryptographic root establishing identity genesis, key ownership, and deterministic recovery (anchored via device hardware, passkeys, or fuzzy biometrics).
   * **Tier 1 (User Direct):** Absolute precedence. Overwrites lower tiers instantly.
   * **Tier 2 (Human Operator):** Administrative overrides. Overwrites automated data, but cannot supersede active Tier 1 state.
   * **Tier 3 (Automated Ingest):** Background syncs and webhooks. Subject to strict timestamp checking and conflict detection.
@@ -17,20 +19,35 @@
 
 ## Core Architecture
 
-```text
-Incoming Payload + Metadata
+Incoming Payload (Claiming Tier 1)
          │
          ▼
- ┌────────────────┐
- │  The One Engine│ ──► Evaluates Tier & UTC Timestamp
- └───────┬────────┘
-         │
- ┌───────┴───────────────────────────────────────────┐
- │                                                   │
- ▼                                                   ▼
-[SystemAction::Overwrite]                 [SystemAction::FlagConflict]
-(Immediate State Mutation)                (Lock Field & Route to Queue)
-```
+ ┌────────────────────────────────────────────────────────┐
+ │ Liveness Proof (Option 1/2 + Argon2id PIN)             │
+ └───────────────────────┬────────────────────────────────┘
+                         │
+                         ├─► Missing Liveness Proof? ──────► YES ──► [RejectUnauthorizedTier1]
+                         │
+                         ├─► Duress PIN Detected? ─────────► YES ──► [LockStateDuress]
+                         │
+                         ▼ (Successfully Unlocks)
+ ┌────────────────────────────────────────────────────────┐
+ │                  Origin Root Key                       │
+ └───────────────────────┬────────────────────────────────┘
+                         │
+                         ▼ (Generates Valid Signature)
+ ┌────────────────────────────────────────────────────────┐
+ │           Tier 1 User Direct Precedence                │
+ └───────────────────────┬────────────────────────────────┘
+                         │
+                         ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ Evaluator::evaluate()                                  │
+ └───────────────────────┬────────────────────────────────┘
+                         │
+                         ├─► Valid Signature + Tier 1? ───► YES ──► [SystemAction::Overwrite]
+                         │
+                         └─► Stale Timestamp? ────────────► YES ──► [RejectStalePayload]
 
 ## Quickstart
 
@@ -64,16 +81,18 @@ fn main() {
             tier: Tier::Tier3Automated,
             timestamp_utc: 1000,
             signature: None,
+            is_duress: None,
         },
     };
 
-    // Incoming payload from end user form submission
+    // Incoming payload authenticated via Origin Key
     let user_update_meta = MetadataHeader {
         entity_id: "usr_101".into(),
         attribute: "phone_number".into(),
         tier: Tier::Tier1UserDirect,
         timestamp_utc: 1005,
-        signature: Some("ed25519_signature_hash".into()),
+        signature: Some("ed25519_origin_signature".into()),
+        is_duress: Some(false),
     };
 
     // Evaluate transition
@@ -84,7 +103,9 @@ fn main() {
     );
 
     match action {
-        SystemAction::Overwrite => println!("State updated immediately."),
+        SystemAction::Overwrite => println!("Tier 1 Origin State committed immediately."),
+        SystemAction::RejectUnauthorizedTier1 => println!("Rejected: Missing Tier 1 Origin signature."),
+        SystemAction::LockStateDuress => println!("Duress detected: Local state locked defensively."),
         SystemAction::FlagConflict => println!("Field locked for review."),
         SystemAction::RejectStalePayload => println!("Payload dropped."),
         SystemAction::Commit => println!("Standard update committed."),
