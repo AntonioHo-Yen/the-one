@@ -48,6 +48,8 @@ Incoming Payload (Claiming Tier 1)
                          ├─► Valid Signature + Tier 1? ───► YES ──► [SystemAction::Overwrite]
                          │
                          └─► Stale Timestamp? ────────────► YES ──► [RejectStalePayload]
+```
+
 
 ## Quickstart
 
