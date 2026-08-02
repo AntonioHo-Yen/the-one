@@ -40,8 +40,51 @@
 2. **Monero Cryptographic Anchoring:** Absolute user authority (Tier 1) shall be asserted via Monero cryptographic primitives:
    * **Off-Chain Challenge Authentication:** Single-use challenge nonces signed via Monero key pairs (`sign_message`).
    * **Transaction & Output Attestation:** Cryptographic proofs (`get_spend_proof`, `get_reserve_proof`) verifying transaction or wallet output authority without exposing balances, wallet history, or real-world identity.
+   * **Local First Party Operations (Unconditional Zero-Cost):** Local state evaluation, personal form auto-filling, and client-side data decryption executed directly by the user are strictly free, offline, and exempt from network metering or payment checks.
+   * **Inbound Third-Party Queries (Monetized Remote Access):** When external third-party applications or remote databases attempt to pull, query, or verify user data attributes over network boundaries, the TO1 Gateway intercepts the request. The payload is released only upon:
+     1. Successful settlement of the user-defined Monero licensing fee directly to the user's subaddress.
+     2. Dual-factor Tier 1 user authorization (Liveness + PIN).     
 
-3. **Third-Party Application Scope:** Third-party applications act as requestors within the ecosystem. They are granted access or state mutation privileges only upon successful cryptographic challenge evaluation by The TO1 Protocol.
+3. **Third-Party Application Scope:** Third-party applications act as requestors within the ecosystem. They are granted access or state mutation privileges only upon successful cryptographic challenge evaluation and verified royalty settlement by The TO1 Protocol.
+
+```
+========================================================================================
+PATH A: LOCAL FIRST-PARTY AUTO-FILL (Free, Client-Side, Zero Network Calls)
+========================================================================================
+
+User / Browser              Local TO1 Engine             Storage Engine
+      │                            │                           │
+      │─── 1. Form Field Focused ─►│                           │
+      │                            │─── 2. Liveness + PIN ────►│
+      │                            │◄── 3. Transient Key ──────│
+      │◄── 4. Inject Verified ─────┤
+      │    Attribute (DOM)         │
+      │   [Cost: 0.00 XMR]         │
+
+========================================================================================
+PATH B: INBOUND THIRD-PARTY REMOTE QUERY (Monetized & Metered)
+========================================================================================
+
+3rd-Party Requestor           TO1 Gateway / Evaluator      Data Owner (Client Engine)
+      │                                 │                             │
+      │── 1. POST /v1/query/attribute ─►│                             │
+      │    (Requests: Phone Number)     │                             │
+      │                                 │── 2. Intercept & Prompt ───►│
+      │                                 │      "App X requests Phone  │
+      │                                 │       Royalty: 0.001 XMR"   │
+      │                                 │                             │
+      │                                 │◄─ 3. Tier 1 Authorization ──┤
+      │                                 │      (Liveness + PIN Sign)  │
+      │                                 │                             │
+      │◄── 4. 402 Payment Required ─────┤                             │
+      │    (Monero Subaddress + Invoice)│                             │
+      │                                 │                             │
+      │── 5. Monero Payment Broadcast ─►│ (On-Chain Mempool Scan)     │
+      │                                 │                             │
+      │◄── 6. 200 OK (Signed Payload) ──┴─────────────────────────────┤
+      │    (Delivers Verified Field)    │── 7. Direct Royalty ───────►│ (Settled)
+```
+
 
 4. **Non-Custodial Governing Entity Genesis:** When an administrative or state entity issues an Origin identity, key generation must occur locally on the user's client hardware. The issuing entity shall never possess, hold, or transmit the user's private key.
 
@@ -116,3 +159,5 @@ The **TO1 Protocol** solves this by enforcing a strict, tier-based permission hi
            ┌──────────────▼───────────────┐
            │  TIER 3: Automated Ingest    │  ◄── Lowest Priority
            └──────────────────────────────┘      (Conditional Sync)
+
+           
