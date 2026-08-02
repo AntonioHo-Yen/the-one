@@ -19,6 +19,10 @@ pub enum SystemAction {
     RejectStalePayload,
     /// Lock contested attribute and route to PENDING_HUMAN_REVIEW queue
     FlagConflict,
+    /// Reject Tier 1 payload lacking signature proof
+    RejectUnauthorizedTier1,
+    /// Lock state defensively if duress is detected
+    LockStateDuress,
 }
 
 /// Metadata header attached to all incoming payloads
@@ -29,6 +33,7 @@ pub struct MetadataHeader {
     pub tier: Tier,
     pub timestamp_utc: u64,
     pub signature: Option<String>,
+    pub is_duress: Option<bool>, // Quick flag for duress PINs
 }
 
 /// Generic state container for a committed attribute value
@@ -52,6 +57,16 @@ impl Evaluator {
             && incoming_meta.timestamp_utc <= current.meta.timestamp_utc 
         {
             return SystemAction::RejectStalePayload;
+        }
+
+        // Tier 1 Validation Guardrails
+        if incoming_meta.tier == Tier::Tier1UserDirect {
+            if incoming_meta.is_duress == Some(true) {
+                return SystemAction::LockStateDuress;
+            }
+            if incoming_meta.signature.is_none() {
+                return SystemAction::RejectUnauthorizedTier1;
+            }
         }
 
         // Evaluate state machine transition matrix based on authority hierarchy
@@ -96,6 +111,7 @@ mod tests {
                 tier,
                 timestamp_utc: timestamp,
                 signature: None,
+                is_duress: None,
             },
         }
     }
@@ -109,10 +125,27 @@ mod tests {
             tier: Tier::Tier1UserDirect,
             timestamp_utc: 1005,
             signature: Some("ed25519_sig".into()),
+            is_duress: None,
         };
 
         let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string());
         assert_eq!(action, SystemAction::Overwrite);
+    }
+
+    #[test]
+    fn test_tier1_missing_signature_rejected() {
+        let current = mock_state(Tier::Tier3Automated, 1000, "+15550000");
+        let incoming_meta = MetadataHeader {
+            entity_id: "usr_01".into(),
+            attribute: "phone_number".into(),
+            tier: Tier::Tier1UserDirect,
+            timestamp_utc: 1005,
+            signature: None,
+            is_duress: None,
+        };
+
+        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string());
+        assert_eq!(action, SystemAction::RejectUnauthorizedTier1);
     }
 
     #[test]
@@ -124,6 +157,7 @@ mod tests {
             tier: Tier::Tier3Automated,
             timestamp_utc: 900,
             signature: None,
+            is_duress: None,
         };
 
         let action = Evaluator::evaluate(&current, &incoming_meta, &"+15558888".to_string());
@@ -139,6 +173,7 @@ mod tests {
             tier: Tier::Tier3Automated,
             timestamp_utc: 1005,
             signature: None,
+            is_duress: None,
         };
 
         let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string());
