@@ -19,6 +19,7 @@
 
 ## Core Architecture
 
+```text
 Incoming Payload (Claiming Tier 1)
          │
          ▼
