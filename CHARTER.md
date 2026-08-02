@@ -2,6 +2,12 @@
 
 > **"Software exists to serve human intent, not to subjugate human authority to database constraints or automation."**
 
+### Preamble: The Restoration of Digital Free Will
+
+In physical systems, human free will is constantly eroded through surveillance, forced compliance, and asymmetrical power dynamics. In the modern digital landscape, this manipulation has been codified into software: individuals are treated as passive data points to be harvested, overwritten, and monetized without consent. Choice has become an illusion dictated by database constraints and corporate algorithms.
+
+This Charter establishes **The TO1 Protocol** as a cryptographic sanctuary for human agency. It asserts that digital free will is not a privilege granted by external platforms, but an unalienable natural right anchored to the individual. By enforcing absolute human precedence, self-sovereign cryptographic key release, and direct economic royalties, this protocol uses mathematics to construct a shield where human intent cannot be overridden, bypassed, or manipulated.
+
 ---
 
 ### Section 1: Fundamental Data Rights
@@ -121,6 +127,20 @@ PATH B: INBOUND THIRD-PARTY REMOTE QUERY (Monetized & Metered)
       **Ephemeral Execution & Privacy Isolation:** Both options shall process biological inputs locally using Fuzzy Extractors to produce transient, in-memory signing keys. Neither raw vascular maps, blood parameters, nor genetic data shall ever be stored on persistent disk or transmitted across network boundaries.
 	
 	  **Duress Protocol Support:** The derivation pipeline shall support user-configured Duress PINs to protect against forced physical compliance, allowing the engine to execute defensive state locks or decoy responses under coercion.
+
+### Section 5: Proactive Intercept & Protocol-Level Invalidation
+
+1. **Proactive Gatekeeping over Reactive Removal:** The protocol acts as a proactive cryptographic gatekeeper at both the local browser DOM and network edge, preventing uncompensated or unauthorized data harvesting before it occurs rather than relying solely on post-exposure remediation.
+
+2. **Ephemeral Permission Grants & Automatic Invalidation:** 
+   * **Single-Use & Time-Bound Grants:** All data disclosures released via Tier 1 authorization shall be cryptographically bound to strict expiration bounds (`timestamp_utc`) and single-use challenge nonces.
+   * **Cryptographic Expiration:** Upon expiration of a permission grant, the underlying signature becomes mathematically invalid.
+   * **Invalidation of Stale/Stolen Data:** Any third-party system, broker, or database attempting to store, re-verify, or trade user attributes without an active, user-signed Tier 1 authorization shall fail protocol challenge verification. The protocol actively strips cryptographic proof of accuracy from un-monetized or un-authorized data copies across the network.
+
+3. **Multi-Layer Intercept Control:**
+   * **Inbound Network Edge:** Rejects unauthenticated third-party queries and holds data behind user-defined Monero royalty settlements.
+   * **Local Outbound DOM Control:** Intercepts browser form fields on client hardware to inject signed attestations or zero-knowledge proofs instead of raw unencrypted attribute strings.
+   * **Attestation Revocation:** Users maintain the sovereign right to broadcast an explicit key revocation signal, instantly invalidating all historical attestation signatures derived from a compromised or superseded session key.
 ---
 
 # The One (TO1) Protocol
