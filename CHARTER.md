@@ -69,10 +69,10 @@
 	 * **Liveness Enforcement:** Measures active subdermal hemoglobin absorption, blood flow micro-pulsation, and thermal signatures. 
 	 * **Target Use:** Rapid, high-security daily operation without physical penetration or wet chemistry.
      
-       **Option 2: Electrochemical Blood Micro-Sample Verification (Maximum Biological Lockdown)** 
-      * **Mechanism:** Hardware-level capillary micro-sample analysis (via point-of-care biosensor). 
-      * **Liveness Enforcement:** Validates active cellular vitality, enzymatic oxidation, and real-time biological electrochemical parameters. Synthetic, dead, or aged samples are rejected instantly. 
-      * **Target Use:** Sovereign disaster recovery, high-compliance authorization, or high-risk air-gapped operations.
+     **Option 2: Electrochemical Blood Micro-Sample Verification (Maximum Biological Lockdown)** 
+   * **Mechanism:** Hardware-level capillary micro-sample analysis (via point-of-care biosensor). 
+   * **Liveness Enforcement:** Validates active cellular vitality, enzymatic oxidation, and real-time biological electrochemical parameters. Synthetic, dead, or aged samples are rejected instantly. 
+   * **Target Use:** Sovereign disaster recovery, high-compliance authorization, or high-risk air-gapped operations.
 
       **Ephemeral Execution & Privacy Isolation:** Both options shall process biological inputs locally using Fuzzy Extractors to produce transient, in-memory signing keys. Neither raw vascular maps, blood parameters, nor genetic data shall ever be stored on persistent disk or transmitted across network boundaries.
 	
