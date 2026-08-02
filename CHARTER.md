@@ -52,6 +52,7 @@
 6. **Read-Only Issuing Authority:** An issuing entity's signature grants attestation validity only. It conveys zero administrative rights to alter, freeze, overwrite, or mutate the user's local TO1 protocol state or future Tier 1 operations.
 
 7. **Immutable Key Retention & Genesis Persistence:**
+     
      1.**Permanence of Origin Anchors:** An Origin root key, once committed, is mathematically permanent and immutable within local state storage. No protocol process, operator override, or third-party request may delete, overwrite, or alter a committed Origin anchor.
 
      2.**Non-Custodial Recovery Sovereignty:** To prevent catastrophic access loss due to hardware failure, the protocol mandates that local Origin keys be strictly bound to deterministic cryptographic backup mechanisms (such as seed-phrase generation or multi-party secret sharing) controlled exclusively by the user.
