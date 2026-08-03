@@ -1,9 +1,10 @@
-# `the-one` Architecture Specification: Evaluator & Egress Control Engine
+# `The-One(TO1)` Architecture Specification: Evaluator & Egress Control Engine
 
-**Version:** 1.0.0 
-**Status:** Architecture Draft / Active Spec 
-**Target Platform:** Linux Workstation (`cobraLair` / Arch Linux Environment) 
-**Core Language:** Rust (`edition = "2021"`) 
+**Version:** 1.0.0  
+**Status:** Architecture Draft / Active Spec  
+**Target Platform:** Linux Workstation (`cobraLair` / Arch Linux Environment)  
+**Core Language:** Rust (`edition = "2021"`)  
+
 ---
 
 ## 1. Executive Summary & Core Mission
