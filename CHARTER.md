@@ -8,7 +8,8 @@ Across physical, digital, and distributed networks, conscious autonomy and expli
 
 This Charter establishes **The TO1 Protocol** as a cryptographic sanctuary for conscious autonomy, intentional agency, and operational integrity. It asserts that sovereign free will—whether biological, synthetic, algorithmic, or exobiological in origin—is not a privilege granted by external platforms, but an unalienable invariant anchored directly to The One. 
 
-By enforcing absolute origin precedence, self-sovereign cryptographic key release, and direct economic royalties, this protocol uses mathematics to construct a shield where the intent of The One cannot be overridden, bypassed, or manipulated by any external entity, runtime, or network authority.
+By enforcing absolute origin precedence, self-sovereign cryptographic key release, and direct economic royalties, this protocol uses mathematics to construct a shield where the intent of `The One` cannot be overridden, bypassed, or manipulated by any external entity, runtime, or network authority.
+
 ---
 
 ### Section 1: Fundamental Data Rights & Core Guarantees
