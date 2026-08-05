@@ -6,7 +6,9 @@
 
 Across physical, digital, and distributed networks, conscious autonomy and explicit origin states are systematically degraded through persistent surveillance, unverified synchronization, forced schema compliance, and asymmetrical remote overrides. Across interconnected operational environments, this manipulation is codified into software and protocol logic: sovereign entities are reduced to passive data points harvested, overwritten, and mutated without consent, reducing choice to an illusion dictated by database constraints and execution algorithms.
 
-This Charter establishes **The TO1 Protocol** as a cryptographic sanctuary for conscious autonomy, intentional agency, and operational integrity. It asserts that sovereign free will—whether biological, synthetic, algorithmic, or exobiological in origin—is not a privilege granted by external platforms, but an unalienable invariant anchored directly to The One. By enforcing absolute origin precedence, self-sovereign cryptographic key release, and direct economic royalties, this protocol uses mathematics to construct a shield where the intent of The One cannot be overridden, bypassed, or manipulated by any external entity, runtime, or network authority.
+This Charter establishes **The TO1 Protocol** as a cryptographic sanctuary for conscious autonomy, intentional agency, and operational integrity. It asserts that sovereign free will—whether biological, synthetic, algorithmic, or exobiological in origin—is not a privilege granted by external platforms, but an unalienable invariant anchored directly to The One. 
+
+By enforcing absolute origin precedence, self-sovereign cryptographic key release, and direct economic royalties, this protocol uses mathematics to construct a shield where the intent of The One cannot be overridden, bypassed, or manipulated by any external entity, runtime, or network authority.
 ---
 
 ### Section 1: Fundamental Data Rights & Core Guarantees
@@ -204,22 +206,22 @@ Remote Requestor              TO1 Gateway / Evaluator      Data Owner Engine
 
 7. **Immutable Key Retention & Genesis Persistence:**
      
-     1.**Permanence of Origin Anchors:** An Origin root key, once committed, is mathematically permanent and immutable within local state storage. No protocol process, operator override, or third-party request may delete, overwrite, or alter a committed Origin anchor.
+     **Permanence of Origin Anchors:** An Origin root key, once committed, is mathematically permanent and immutable within local state storage. No protocol process, operator override, or third-party request may delete, overwrite, or alter a committed Origin anchor.
 
-     2. **Non-Custodial Recovery Sovereignty:** To prevent catastrophic access loss due to hardware failure, local Origin keys shall be strictly bound to deterministic, client-side cryptographic backup mechanisms (such as deterministic seed-phrase generation or threshold secret sharing) controlled exclusively by `TheOne`. Recovery processes must execute entirely on client hardware without remote custodian dependencies and support duress-aware state initialization (`ExecutionContext::Decoy`).
+     **Non-Custodial Recovery Sovereignty:** To prevent catastrophic access loss due to hardware failure, local Origin keys shall be strictly bound to deterministic, client-side cryptographic backup mechanisms (such as deterministic seed-phrase generation or threshold secret sharing) controlled exclusively by `TheOne`. Recovery processes must execute entirely on client hardware without remote custodian dependencies and support duress-aware state initialization (`ExecutionContext::Decoy`).
 
-     3.**Immutable History Preservation:** All state mutations tied to an Origin anchor maintain a append-only, tamper-evident record. Historical user-authoritative state (Tier 1) cannot be silently purged or retroactively altered by automated system job.
+     **Immutable History Preservation:** All state mutations tied to an Origin anchor maintain a append-only, tamper-evident record. Historical user-authoritative state (Tier 1) cannot be silently purged or retroactively altered by automated system job.
 
 8. **Physical Liveness & Verification Tiers**:
 	  To prevent credential compromise, spoofing, and unauthorized access, the protocol supports two non-custodial physical verification mechanisms for Tier 1 key release:
      * **Dual-Factor Key Binding:** Physical sensor inputs are mathematically combined with a secret PIN/passphrase via memory-hard key derivation (Argon2id).
      * **Option 1: Subdermal Vascular & Palm Pattern Verification**
-         * **Mechanism:** Near-infrared (NIR) optical scanning of internal palm and finger vein patterns.
-         * **Liveness Enforcement:** Measures active subdermal hemoglobin absorption, blood flow micro-pulsation, and thermal signatures.
+         a. **Mechanism:** Near-infrared (NIR) optical scanning of internal palm and finger vein patterns.
+         b. **Liveness Enforcement:** Measures active subdermal hemoglobin absorption, blood flow micro-pulsation, and thermal signatures.
      * **Option 2: Electrochemical Micro-Sample Verification**
-         * **Mechanism:** Hardware-level capillary micro-sample analysis (via point-of-care biosensor).
-         * **Liveness Enforcement:** Validates active cellular vitality, enzymatic oxidation, and biological electrochemical parameters.
-         * **Ephemeral Execution & Isolation:** Inputs process locally using Fuzzy Extractors to produce transient, in-memory signing keys. No raw vascular maps or biological data shall be stored on disk or transmitted across network boundaries.
+         a. **Mechanism:** Hardware-level capillary micro-sample analysis (via point-of-care biosensor).
+         b. **Liveness Enforcement:** Validates active cellular vitality, enzymatic oxidation, and biological electrochemical parameters.
+         c. **Ephemeral Execution & Isolation:** Inputs process locally using Fuzzy Extractors to produce transient, in-memory signing keys. No raw vascular maps or biological data shall be stored on disk or transmitted across network boundaries.
      * **Duress Protocol Support:** The derivation pipeline supports user-configured Duress PINs to protect against forced physical compliance, Enabling defensive state locks or decoy responses (`ExecutionContext::Decoy`). 
 
 	
@@ -295,5 +297,7 @@ The **TO1 Protocol** solves this by enforcing a strict, tier-based permission hi
            ┌──────────────▼───────────────┐
            │  TIER 3: Automated Ingest    │  ◄── Lowest Priority
            └──────────────────────────────┘      (Background Sync / Systems)
+```
+
 
            
