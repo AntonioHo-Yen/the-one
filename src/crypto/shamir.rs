@@ -52,7 +52,7 @@ pub fn unblind_local_share(
     }
 
     // AES-256-GCM decryption using vascular_key
-    let mut hasher = blake3::Hasher::new_key(vascular_key.as_bytes());
+    let mut hasher = blake3::Hasher::new_keyed(vascular_key.as_bytes());
     hasher.update(&blinded.nonce);
     let mask = hasher.finalize();
 

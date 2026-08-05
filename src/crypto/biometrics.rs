@@ -1,5 +1,6 @@
-use zeroize::Zeroize;
+use getrandom::fill as fill_bytes;
 use thiserror::Error;
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 #[derive(Error, Debug)]
 pub enum BiometricError {
@@ -27,8 +28,7 @@ pub struct VascularHelperData {
 /// Ephemeral key derived in RAM during a valid vascular scan.
 /// Uses `zeroize` to ensure CPU registers and memory are wiped immediately 
 /// when this struct goes out of scope.
-#[derive(Zeroize)]
-#[zeroize(drop)]
+#[derive(Zeroize, ZeroizeOnDrop)]
 pub struct EphemeralVascularKey {
     pub key_bytes: [u8; 32],
 }
@@ -53,11 +53,11 @@ impl FuzzyExtractorEngine {
 
         // 1. Generate a cryptographic salt for Key Derivation
         let mut salt = [0u8; 32];
-        getrandom::getrandom(&mut salt).map_err(|_| BiometricError::InvalidVector)?;
+        fill_bytes(&mut salt).map_err(|_| BiometricError::InvalidVector)?;
 
         // 2. Compute the deterministic key (K_bio) from raw vector features + salt
         let mut key_bytes = [0u8; 32];
-        let mut hasher = blake3::Hasher::new_key(&salt);
+        let mut hasher = blake3::Hasher::new_keyed(&salt);
         hasher.update(raw_vector);
         key_bytes.copy_from_slice(hasher.finalize().as_bytes());
 
@@ -90,7 +90,7 @@ impl FuzzyExtractorEngine {
 
         // 2. Derive the exact same 256-bit key using the stored salt
         let mut key_bytes = [0u8; 32];
-        let mut hasher = blake3::Hasher::new_key(&helper_data.salt);
+        let mut hasher = blake3::Hasher::new_keyed(&helper_data.salt);
         hasher.update(&corrected_vector);
         key_bytes.copy_from_slice(hasher.finalize().as_bytes());
 

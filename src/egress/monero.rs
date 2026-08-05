@@ -1,38 +1,46 @@
-// #[derive(Debug)]
-// pub struct MoneroRpcClient {
-//     pub rpc_url: String,
-// }
+use crate::egress::invoice::LicensingInvoice;
+use thiserror::Error;
 
-// impl MoneroRpcClient {
-//     pub fn from_env() -> Self {
-//         let rpc_url = std::env::var("MONERO_RPC_URL")
-//             .unwrap_or_else(|_| "http://127.0.0.1:18081/json_rpc".to_string());
+#[derive(Error, Debug)]
+pub enum MoneroError {
+    #[error("HTTP RPC request failed: {0}")]
+    NetworkError(String),
+    #[error("Payment verification failed for subaddress: {0}")]
+    PaymentNotFound(String),
+}
 
-//         Self { rpc_url }
-//     }
-
-//     pub fn verify_payment(&self, _tx_hash: &str) -> Result<bool, String> {
-//         // RPC network call logic goes here
-//         Ok(true)
-//     }
-// }
-
-use serde_json::json;
+#[derive(Debug, Clone)]
+pub struct MoneroRpcClient {
+    pub rpc_url: String,
+    pub account_index: u32,
+}
 
 impl MoneroRpcClient {
-    pub async fn check_payment_status(&self, subaddress: &str) -> Result<bool, MoneroError> {
-        let client = reqwest::Client::new();
-        let res = client.post(&self.rpc_url)
-            .json(&json!({
-                "jsonrpc": "2.0",
-                "id": "0",
-                "method": "get_transfers",
-                "params": { "in": true, "subaddr_indices": [self.account_index] }
-            }))
-            .send()
-            .await?;
-            
-        // Parse incoming transfer list for matching subaddress & required amount
-        Ok(true) // Return true when block depth confirmation is met
+    pub fn new(rpc_url: impl Into<String>, account_index: u32) -> Self {
+        Self {
+            rpc_url: rpc_url.into(),
+            account_index,
+        }
+    }
+
+    pub fn generate_subaddress_invoice(&self, amount_xmr: f64) -> LicensingInvoice {
+        let fake_subaddress = format!("888tXMR_{}", self.account_index);
+        let invoice_id = format!("INV-{}", self.account_index);
+
+        // Convert f64 XMR to atomic units (piconero / u64)
+        let amount_piconeros = (amount_xmr * 1e12) as u64;
+
+        LicensingInvoice::new(invoice_id, amount_piconeros, fake_subaddress)
+    }
+
+    pub async fn check_payment_status(&self, _subaddress: &str) -> Result<bool, MoneroError> {
+        let _client = reqwest::Client::new();
+        
+        // Live RPC check logic goes here
+        Ok(true)
+    }
+
+    pub fn verify_payment(&self, _tx_hash: &str) -> Result<bool, String> {
+        Ok(true)
     }
 }
