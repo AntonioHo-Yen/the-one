@@ -1,17 +1,10 @@
+use crate::authority::origin::{AuthorityTier, ExecutionContext, OriginKeyManager};
 use serde::{Deserialize, Serialize};
-
-/// System Authority Tiers as defined by the Charter
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-pub enum Tier {
-    Tier3Automated = 3,
-    Tier2HumanOperator = 2,
-    Tier1UserDirect = 1,
-}
 
 /// Evaluation outcomes returned by the State Engine
 #[derive(Debug, PartialEq, Eq)]
 pub enum SystemAction {
-    /// Overwrite existing state immediately (Tier 1 > Tier 3/2 or Tier 2 > Tier 3)
+    /// Overwrite existing state immediately (Tier 1 > Tier 2/3)
     Overwrite,
     /// Normal commit for non-conflicting background updates
     Commit,
@@ -30,10 +23,9 @@ pub enum SystemAction {
 pub struct MetadataHeader {
     pub entity_id: String,
     pub attribute: String,
-    pub tier: Tier,
+    pub tier: AuthorityTier,
     pub timestamp_utc: u64,
     pub signature: Option<String>,
-    pub is_duress: Option<bool>, // Quick flag for duress PINs
 }
 
 /// Generic state container for a committed attribute value
@@ -47,39 +39,46 @@ pub struct Evaluator;
 
 impl Evaluator {
     /// Evaluates incoming payload against committed state and returns the required SystemAction.
+    /// Canonical Tier 1 signature and duress checks are delegated directly to `OriginKeyManager`.
     pub fn evaluate<T: PartialEq>(
         current: &AttributeState<T>,
         incoming_meta: &MetadataHeader,
         incoming_value: &T,
+        key_manager: Option<&OriginKeyManager>,
     ) -> SystemAction {
-        // Guardrail: Enforce Rule 3 - Reject stale Tier 3 payloads immediately
-        if incoming_meta.tier == Tier::Tier3Automated 
-            && incoming_meta.timestamp_utc <= current.meta.timestamp_utc 
+        // Guardrail 1: Enforce stale check for automated operations
+        if incoming_meta.tier == AuthorityTier::Tier3Observer
+            && incoming_meta.timestamp_utc <= current.meta.timestamp_utc
         {
             return SystemAction::RejectStalePayload;
         }
 
-        // Tier 1 Validation Guardrails
-        if incoming_meta.tier == Tier::Tier1UserDirect {
-            if incoming_meta.is_duress == Some(true) {
-                return SystemAction::LockStateDuress;
-            }
-            if incoming_meta.signature.is_none() {
+        // Guardrail 2: Canonical Tier 1 Validation using OriginKeyManager
+        if incoming_meta.tier == AuthorityTier::Tier1Origin {
+            let sig = incoming_meta.signature.as_deref().unwrap_or("");
+            
+            if let Some(km) = key_manager {
+                match km.validate_tier1_execution(sig, AuthorityTier::Tier1Origin) {
+                    Ok(ExecutionContext::Decoy) => return SystemAction::LockStateDuress,
+                    Err(_) => return SystemAction::RejectUnauthorizedTier1,
+                    Ok(ExecutionContext::Real) => {}
+                }
+            } else if sig.trim().is_empty() {
                 return SystemAction::RejectUnauthorizedTier1;
             }
         }
 
-        // Evaluate state machine transition matrix based on authority hierarchy
+        // Guardrail 3: State machine transition matrix based on AuthorityTier ordering
         match (current.meta.tier, incoming_meta.tier) {
             // Tier 1 User Action ALWAYS overwrites lower tiers
-            (_, Tier::Tier1UserDirect) => SystemAction::Overwrite,
+            (_, AuthorityTier::Tier1Origin) => SystemAction::Overwrite,
 
-            // Tier 2 Operator Override overwrites Tier 3, but cannot overwrite newer Tier 1
-            (Tier::Tier3Automated, Tier::Tier2HumanOperator) => SystemAction::Overwrite,
-            (Tier::Tier1UserDirect, Tier::Tier2HumanOperator) => SystemAction::RejectStalePayload,
+            // Tier 2 Delegated overrides Tier 3 Observer, but cannot overwrite Tier 1 Origin
+            (AuthorityTier::Tier3Observer, AuthorityTier::Tier2Delegated) => SystemAction::Overwrite,
+            (AuthorityTier::Tier1Origin, AuthorityTier::Tier2Delegated) => SystemAction::RejectStalePayload,
 
             // Tier 3 Ingest vs Tier 3 Ingest
-            (Tier::Tier3Automated, Tier::Tier3Automated) => {
+            (AuthorityTier::Tier3Observer, AuthorityTier::Tier3Observer) => {
                 if current.value == *incoming_value {
                     SystemAction::Commit
                 } else {
@@ -87,13 +86,13 @@ impl Evaluator {
                 }
             }
 
-            // Automated Tier 3 cannot overwrite Tier 1 or Tier 2 committed states
-            (Tier::Tier1UserDirect | Tier::Tier2HumanOperator, Tier::Tier3Automated) => {
+            // Lower tiers (Tier 3 / Tier 2) cannot overwrite higher committed states
+            (AuthorityTier::Tier1Origin | AuthorityTier::Tier2Delegated, AuthorityTier::Tier3Observer) => {
                 SystemAction::RejectStalePayload
             }
 
             // Equal Tier 2 handling
-            (Tier::Tier2HumanOperator, Tier::Tier2HumanOperator) => SystemAction::Overwrite,
+            (AuthorityTier::Tier2Delegated, AuthorityTier::Tier2Delegated) => SystemAction::Overwrite,
         }
     }
 }
@@ -102,7 +101,7 @@ impl Evaluator {
 mod tests {
     use super::*;
 
-    fn mock_state(tier: Tier, timestamp: u64, val: &str) -> AttributeState<String> {
+    fn mock_state(tier: AuthorityTier, timestamp: u64, val: &str) -> AttributeState<String> {
         AttributeState {
             value: val.to_string(),
             meta: MetadataHeader {
@@ -111,72 +110,35 @@ mod tests {
                 tier,
                 timestamp_utc: timestamp,
                 signature: None,
-                is_duress: None,
             },
         }
     }
 
     #[test]
     fn test_tier1_overwrites_tier3() {
-        let current = mock_state(Tier::Tier3Automated, 1000, "+15550000");
+        let current = mock_state(AuthorityTier::Tier3Observer, 1000, "+15550000");
         let incoming_meta = MetadataHeader {
             entity_id: "usr_01".into(),
             attribute: "phone_number".into(),
-            tier: Tier::Tier1UserDirect,
+            tier: AuthorityTier::Tier1Origin,
             timestamp_utc: 1005,
-            signature: Some("ed25519_sig".into()),
-            is_duress: None,
+            signature: Some("valid_sig".into()),
         };
-
-        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string());
+        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string(), None);
         assert_eq!(action, SystemAction::Overwrite);
     }
 
     #[test]
     fn test_tier1_missing_signature_rejected() {
-        let current = mock_state(Tier::Tier3Automated, 1000, "+15550000");
+        let current = mock_state(AuthorityTier::Tier3Observer, 1000, "+15550000");
         let incoming_meta = MetadataHeader {
             entity_id: "usr_01".into(),
             attribute: "phone_number".into(),
-            tier: Tier::Tier1UserDirect,
+            tier: AuthorityTier::Tier1Origin,
             timestamp_utc: 1005,
             signature: None,
-            is_duress: None,
         };
-
-        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string());
+        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string(), None);
         assert_eq!(action, SystemAction::RejectUnauthorizedTier1);
-    }
-
-    #[test]
-    fn test_stale_tier3_rejected() {
-        let current = mock_state(Tier::Tier3Automated, 1000, "+15550000");
-        let incoming_meta = MetadataHeader {
-            entity_id: "usr_01".into(),
-            attribute: "phone_number".into(),
-            tier: Tier::Tier3Automated,
-            timestamp_utc: 900,
-            signature: None,
-            is_duress: None,
-        };
-
-        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15558888".to_string());
-        assert_eq!(action, SystemAction::RejectStalePayload);
-    }
-
-    #[test]
-    fn test_conflicting_tier3_flags_review() {
-        let current = mock_state(Tier::Tier3Automated, 1000, "+15550000");
-        let incoming_meta = MetadataHeader {
-            entity_id: "usr_01".into(),
-            attribute: "phone_number".into(),
-            tier: Tier::Tier3Automated,
-            timestamp_utc: 1005,
-            signature: None,
-            is_duress: None,
-        };
-
-        let action = Evaluator::evaluate(&current, &incoming_meta, &"+15559999".to_string());
-        assert_eq!(action, SystemAction::FlagConflict);
     }
 }

@@ -1,18 +1,23 @@
 //! # Authority & Taxonomy Architecture (`src/authority/origin.rs`)
 //!
-//! ## 1. Core Principles
-//! * **Identity vs. Role Decoupling:** Every entity fundamentally exists at `JobClass::Indigenous` (Level 0) as an un-delegated, sovereign baseline human identity.
+//! ## 1. System Authority Tiers
+//! * **`AuthorityTier::Tier1Origin`:** Inherent Human precedence / Immutable Origin Key validation.
+//! * **`AuthorityTier::Tier2Delegated`:** Automated sub-routines and delegated agent key signatures.
+//! * **`AuthorityTier::Tier3Observer`:** Read-only, ingest, and audit agents.
+//!
+//! ## 2. Core Principles
+//! * **Identity vs. Role Decoupling:** Every entity fundamentally exists at `JobClass::TheOne` (Level 0) as an un-delegated, sovereign baseline human identity.
 //! * **Ephemeral Parallel Stacks:** Elevated operational roles (e.g., `SoftwareEngineering`, `Executive`, `MunicipalPolice`) are attached dynamically via `ParallelRoleStack` and `ActiveContext`.
-//! * **Zero-Lockout Lifecycle:** When an elevated role expires, is revoked, or is collapsed, the active session cleanly reverts back to `JobClass::Indigenous` without altering or destroying the underlying origin identity.
+//! * **Zero-Lockout Lifecycle:** When an elevated role expires, is revoked, or is collapsed, the active session cleanly reverts back to `JobClass::TheOne` without altering or destroying the underlying origin identity.
 //!
 //! ---
 //!
-//! ## 2. Global Priority Taxonomy Hierarchy (`rank_level`)
+//! ## 3. Global Priority Taxonomy Hierarchy (`rank_level`)
 //! The `JobClass` enum derives `PartialOrd` and `Ord` to allow direct comparison operators (`<`, `>`). Lower numerical rank levels represent higher structural precedence:
 //!
 //! | Level | Category Name | Primary Variants / Sectors |
 //! | :--- | :--- | :--- |
-//! | **0** | **Inherent Baseline** | `Indigenous` (Un-delegated sovereign human precedence) |
+//! | **0** | **Inherent Baseline** | `TheOne` (Un-delegated sovereign origin precedence) |
 //! | **1** | **Education & Knowledge** | `EducationAndAcademia` |
 //! | **2** | **Healthcare & Sanitation** | `PhysiciansAndSurgeons`, `HealthcareAndClinical`, `ScientificResearch`, `SanitationAndWasteManagement`, `EnvironmentalAndPublicWorks` |
 //! | **3** | **Infrastructure Builders** | `InfrastructureOps`, `EnergyAndUtilities`, `SkilledTrades` |
@@ -28,7 +33,7 @@
 //!
 //! ---
 //!
-//! ## 3. Parked/Dormant Stack Management Pattern
+//! ## 4. Parked/Dormant Stack Management Pattern
 //!
 //! ### Storing vs. Activating Role Stacks
 //! Unused role assignments can be stored as dormant data (`Vec<ParallelRoleStack>`) on disk or in local memory, serializing cleanly via Serde.
@@ -47,7 +52,7 @@
 //!
 //! active_context.elevate_role(dev_role);
 //!
-//! // B. Return active context back to baseline (Indigenous)
+//! // B. Return active context back to baseline (TheOne)
 //! active_context.collapse_to_baseline();
 //!
 //! // C. Re-attach a parked/unused stack whenever needed
@@ -84,7 +89,7 @@ pub enum JobClass {
     // LEVEL 0: INHERENT HUMAN PRECEDENCE
     // =========================================================================
     /// Baseline Sovereign Human capacity; un-delegated and un-revokable baseline.
-    Indigenous = 0,
+    TheOne = 0,
 
     // =========================================================================
     // LEVEL 1: EDUCATORS & ACADEMIA
@@ -195,15 +200,15 @@ pub enum JobClass {
 
 impl Default for JobClass {
     fn default() -> Self {
-        JobClass::Indigenous
+        JobClass::TheOne
     }
 }
 
 impl JobClass {
-    /// Returns the exact priority rank level (0 = Indigenous, 1 = Educator, 2 = Healthcare & Sanitation, etc.)
+    /// Returns the exact priority rank level (0 = TheOne, 1 = Educator, 2 = Healthcare & Sanitation, etc.)
     pub fn rank_level(&self) -> u8 {
         match self {
-            JobClass::Indigenous => 0,
+            JobClass::TheOne => 0,
             JobClass::EducationAndAcademia => 1,
 
             JobClass::PhysiciansAndSurgeons
@@ -273,7 +278,7 @@ impl JobClass {
 }
 
 /// Specialized Parallel Role Classifications for Tier 1 Contexts.
-/// Allows a baseline human identity to step into elevated institutional roles.
+/// Allows a baseline origin identity to step into elevated institutional roles.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Tier1Classification {
     Sovereign {
