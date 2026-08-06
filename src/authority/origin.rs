@@ -89,7 +89,7 @@ pub enum JobClass {
     // LEVEL 0: INHERENT HUMAN PRECEDENCE
     // =========================================================================
     /// Baseline Sovereign Human capacity; un-delegated and un-revokable baseline.
-    TheOne = 0,
+    TheOne,
 
     // =========================================================================
     // LEVEL 1: EDUCATORS & ACADEMIA
@@ -194,7 +194,7 @@ pub enum JobClass {
     Custom {
         sector: String,
         title: String,
-        code: Option<String>,
+        code: u32,
     },
 }
 
